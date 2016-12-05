@@ -114,7 +114,9 @@ RUN mkdir -p /data /persist-seed && \
     mv /var/lib/postgresql /persist-seed/pgsql && \
     ln -s /data/pgsql /var/lib/postgresql && \
     mv /var/log /persist-seed/log && \
-    ln -s /data/log /var/log
+    ln -s /data/log /var/log && \
+    mv /etc/nginx /persist-seed/nginx && \
+    ln -s /data/nginx /etc/nginx
 
 USER root
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
