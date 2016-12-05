@@ -64,6 +64,13 @@ RUN apt-get install -y --force-yes \
 		freeswitch-mod-imagick freeswitch-mod-tts-commandline \
 		freeswitch-mod-directory freeswitch-mod-flite\
 	&& apt-get clean
+
+# Check out same version as in upstream's working container images on
+# docker hub
+RUN cd /var/www/fusionpbx \
+    && git reset --hard 120b37361e2778feec38cc9a43814335b97c5c28
+RUN chown -R www-data:www-data /var/www/fusionpbx
+
 RUN usermod -a -G freeswitch www-data \
 	&& usermod -a -G www-data freeswitch \
 	&& chown -R freeswitch:freeswitch /var/lib/freeswitch \
