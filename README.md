@@ -13,10 +13,12 @@ First pull the image using the command:
 docker pull digitaldaz/fusionpbx-docker
 ```
 
-Once the image has downloaded:
+Once the image has downloaded, designate a directory to persist data
+across container restarts, and run:
 
 ```
-docker run --net=host --privileged --name container-name-here -d digitaldaz/fusionpbx-docker
+docker run --rm --net=host --privileged --name fusionpbx -d \
+	-v ${PERSIST_DIR}:/data digitaldaz/fusionpbx-docker
 ```
 
 The placeholder container-name-here can be set to anything you
@@ -35,11 +37,10 @@ CONTAINER ID        IMAGE                         COMMAND                  CREAT
 017c1a7397e1        digitaldaz/fusionpbx-docker   "/bin/sh -c '/usr/bin"   10 seconds ago      Up 7 seconds
 ```
 
-Replacing the Container ID with our own, and substituting mypassword
-with an appropriate one we do:
+Substituting mypassword with an appropriate one we do:
 
 ```
-docker exec 017c1a7397e1 sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD 'mypassword';"
+docker exec fusionpbx sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD 'mypassword';"
 ```
 
 You will know this has been successful when it returns:

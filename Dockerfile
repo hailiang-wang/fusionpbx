@@ -84,19 +84,37 @@ RUN password=$(dd if=/dev/urandom bs=1 count=20 2>/dev/null | base64) \
 	&& apt-get install -y --force-yes sudo postgresql \
 	&& apt-get clean
 RUN service postgresql start \
-	&& sleep 10 \
-	&& { \
-	    echo "psql -c \"CREATE DATABASE fusionpbx\";" \
-	    && echo "psql -c \"CREATE DATABASE freeswitch\";"  \
-	    && echo "psql -c \"CREATE ROLE fusionpbx WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\";" \
-	    && echo "psql -c \"CREATE ROLE freeswitch WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\";" \
-	    && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE fusionpbx to fusionpbx\";" \
-	    && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to fusionpbx\";" \
-	    && echo "psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to freeswitch\";" \
-	} | su - postgres 
+    && sleep 10 \
+    && su - postgres -c " \
+	psql -c \"CREATE DATABASE fusionpbx\"; \
+	psql -c \"CREATE DATABASE freeswitch\"; \
+	psql -c \"CREATE ROLE fusionpbx WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\"; \
+	psql -c \"CREATE ROLE freeswitch WITH SUPERUSER LOGIN PASSWORD '$PSQL_PASSWORD'\"; \
+	psql -c \"GRANT ALL PRIVILEGES ON DATABASE fusionpbx to fusionpbx\"; \
+	psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to fusionpbx\"; \
+	psql -c \"GRANT ALL PRIVILEGES ON DATABASE freeswitch to freeswitch\"; \
+    "
+
+RUN mkdir -p /data /persist-seed && \
+    mv /etc/freeswitch /persist-seed/fs_etc && \
+    ln -s /data/fs_etc /etc/freeswitch && \
+    mv /usr/share/freeswitch /persist-seed/fs_share && \
+    ln -s /data/fs_share /usr/share/freeswitch && \
+    mv /var/lib/freeswitch /persist-seed/fs_var_lib && \
+    ln -s /data/fs_var_lib /var/lib/freeswitch && \
+    mv /var/www/fusionpbx /persist-seed/fs_var_www && \
+    ln -s /data/fs_var_www /var/www/fusionpbx && \
+    mv /var/lib/postgresql /persist-seed/pgsql && \
+    ln -s /data/pgsql /var/lib/postgresql && \
+    mv /var/log /persist-seed/log && \
+    ln -s /data/log /var/log
+
 USER root
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY start-freeswitch.sh /usr/bin/start-freeswitch.sh
-VOLUME ["/var/lib/postgresql", "/etc/freeswitch", "/var/lib/freeswitch", \
-        "/usr/share/freeswitch", "/var/www/fusionpbx"]
-CMD /usr/bin/supervisord -n
+COPY bootstrap-freeswitch.sh /usr/bin/
+VOLUME ["/data"]
+ENV PERSIST_DIR=/data
+ENV SEED_DIR=/persist-seed
+CMD /usr/bin/bootstrap-freeswitch.sh
+
