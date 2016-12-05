@@ -13,40 +13,14 @@ First pull the image using the command:
 docker pull digitaldaz/fusionpbx-docker
 ```
 
-Once the image has downloaded, designate a directory to persist data
-across container restarts, and run:
+Once the image has downloaded, start the container.  Designate a
+directory to persist data across container restarts, and choose a
+password.  Set the environment variables for the following command:
 
 ```
 docker run --rm --net=host --privileged --name fusionpbx -d \
-	-v ${PERSIST_DIR}:/data digitaldaz/fusionpbx-docker
-```
-
-The placeholder container-name-here can be set to anything you
-like. This will start the container running, we now need to set the
-database password, to do this we need to find the container id and so
-we run:
-
-```
-docker ps
-```
-
-This will produce output similar to:
-
-```
-CONTAINER ID        IMAGE                         COMMAND                  CREATED             STATUS
-017c1a7397e1        digitaldaz/fusionpbx-docker   "/bin/sh -c '/usr/bin"   10 seconds ago      Up 7 seconds
-```
-
-Substituting mypassword with an appropriate one we do:
-
-```
-docker exec fusionpbx sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD 'mypassword';"
-```
-
-You will know this has been successful when it returns:
-
-```
-ALTER ROLE
+	-v ${PERSIST_DIR}:/data -e FUSIONPBX_PASS=${FUSIONPBX_PASS} \
+	digitaldaz/fusionpbx-docker
 ```
 
 We now need to visit the web interface to set up FusionPBX. In your
