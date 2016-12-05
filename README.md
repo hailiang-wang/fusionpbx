@@ -18,7 +18,10 @@ directory to persist data across container restarts, and choose a
 password.  Set the environment variables for the following command:
 
 ```
-docker run --rm --net=host --privileged --name fusionpbx -d \
+docker run --rm --name fusionpbx \
+	-p 80:80 -p 443:443 \
+	-p 5060:5060/udp -p 5060:5060 -p 5080:5080/udp -p 5080:5080 \
+	-p 7000-8000:7000-8000/udp \
 	-v ${PERSIST_DIR}:/data -e FUSIONPBX_PASS=${FUSIONPBX_PASS} \
 	digitaldaz/fusionpbx-docker
 ```

@@ -123,5 +123,6 @@ COPY bootstrap-freeswitch.sh /usr/bin/
 VOLUME ["/data"]
 ENV PERSIST_DIR=/data
 ENV SEED_DIR=/persist-seed
+EXPOSE 80 443 5060/udp 5060 5080/udp 5080 7000-8000/udp
 CMD /usr/bin/bootstrap-freeswitch.sh
 
